@@ -89,9 +89,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  _doubleCounter() {
-    setState(() {
-      _counter = _counter * 2;
-    });
-  }
 }
