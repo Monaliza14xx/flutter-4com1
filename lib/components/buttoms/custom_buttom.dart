@@ -22,6 +22,6 @@ class CustomButton extends StatelessWidget {
             primary: btnColor,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20))),
-        child: Text(btnText));
+        child: Text(btnText, style: const TextStyle(fontFamily: 'NotoSansLao' ),));
   }
 }

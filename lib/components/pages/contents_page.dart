@@ -17,7 +17,7 @@ class ArticleDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(article.imageUrl),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Author: ${article.author}',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

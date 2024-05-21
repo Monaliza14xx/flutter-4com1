@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               const Text(
                 'ຈຳນວນ',
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20, fontFamily: 'NotoSansLao' ),
               ),
               Text(
                 '$_counter',
