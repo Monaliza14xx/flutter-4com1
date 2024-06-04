@@ -15,7 +15,7 @@ class NavigationBarApp extends StatelessWidget {
         theme: ThemeData(useMaterial3: true, primarySwatch: Colors.green),
         home: const NavigationExample(),
         routes: <String, WidgetBuilder>{
-          '/second': (BuildContext context) => const SecondPage(),
+          '/second': (BuildContext context) =>  SecondPage(),
           '/home': (BuildContext context) =>
               const MyHomePage(title: 'HomePage'),
         });

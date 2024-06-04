@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../buttoms/custom_buttom.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -11,6 +13,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _value = "Innital value";
+  late String _data = "No data";
+
+  void convertData(value) {
+    setState(() {
+      _data = value.toString();
+    });
+  }
+
+  void getData() async {
+    var url = Uri.parse('https://sheetdb.io/api/v1/3eb1vmdoo19g2');
+    http.Response response = await http.get(url);
+    if (response.statusCode == 200) {
+      convertData(jsonDecode(utf8.decode(response.bodyBytes)));
+    } else {
+      convertData("Error");
+    }
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -32,12 +52,23 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _reciveContext(value) {
+    setState(() {
+      _value = value;
+    });
+  }
+
   void _goToSecondPage() {
-    Navigator.pushNamed(context, '/second');
+    Navigator.pushNamed(context, '/second', arguments: {
+      "title": "second page",
+      "content": "This is the second page",
+      "counter": _counter
+    }).then((value) => _reciveContext(value));
   }
 
   @override
   Widget build(BuildContext context) {
+    getData();
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.green),
       home: Scaffold(
@@ -50,9 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text(_value, style: const TextStyle(fontSize: 20)),
               const Text(
                 'ຈຳນວນ',
-                style: TextStyle(fontSize: 20, fontFamily: 'NotoSansLao' ),
+                style: TextStyle(fontSize: 20, fontFamily: 'NotoSansLao'),
               ),
               Text(
                 '$_counter',
@@ -81,6 +113,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 btnFunc: _goToSecondPage,
                 btnColor: Colors.cyan,
                 btnText: "Go to second page",
+              ),
+              Text(
+                _data.toString(),
               )
             ],
           ),
@@ -88,5 +123,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
 }
