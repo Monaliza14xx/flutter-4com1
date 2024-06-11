@@ -23,7 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void getData() async {
-    var url = Uri.parse('https://sheetdb.io/api/v1/3eb1vmdoo19g2');
+    var url = Uri.parse('https://sheetdb.io/api/v1/2i98c60xvm3gp');
     http.Response response = await http.get(url);
     if (response.statusCode == 200) {
       convertData(jsonDecode(utf8.decode(response.bodyBytes)));
@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    getData();
+   
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.green),
       home: Scaffold(
@@ -120,6 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: getData,
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        )
       ),
     );
   }
