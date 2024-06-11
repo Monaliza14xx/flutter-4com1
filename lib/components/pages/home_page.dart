@@ -30,16 +30,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _showInputDialog() {
-    TextEditingController stdIdController = TextEditingController();
-    TextEditingController nameController = TextEditingController();
-    TextEditingController surnameController = TextEditingController();
+  void _showInputDialog({Student? student}) {
+    TextEditingController stdIdController =
+        TextEditingController(text: student?.stdId ?? '');
+    TextEditingController nameController =
+        TextEditingController(text: student?.name ?? '');
+    TextEditingController surnameController =
+        TextEditingController(text: student?.surname ?? '');
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Student Data'),
+          title: Text(
+              student == null ? 'Enter Student Data' : 'Edit Student Data'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -67,7 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               child: const Text('Submit'),
               onPressed: () {
-                _addStudent(stdIdController.text, nameController.text, surnameController.text);
+                if (student == null) {
+                  _addStudent(stdIdController.text, nameController.text,
+                      surnameController.text);
+                } else {
+                  _editStudent(student, stdIdController.text,
+                      nameController.text, surnameController.text);
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -78,8 +88,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _addStudent(String stdId, String name, String surname) {
-    String newId = (_dataList.isNotEmpty ? (int.parse(_dataList.last.id) + 1).toString() : '1');
-    Student newStudent = Student(id: newId, stdId: stdId, name: name, surname: surname);
+    String newId = (_dataList.isNotEmpty
+        ? (int.parse(_dataList.last.id) + 1).toString()
+        : '1');
+    Student newStudent =
+        Student(id: newId, stdId: stdId, name: name, surname: surname);
     setState(() {
       _dataList.add(newStudent);
     });
@@ -88,11 +101,80 @@ class _MyHomePageState extends State<MyHomePage> {
     _sendDataToServer(newStudent);
   }
 
+  void _editStudent(
+      Student student, String stdId, String name, String surname) {
+    Student editedStudent =
+    Student(id: student.id, stdId: stdId, name: name, surname: surname);
+    setState(() {
+      int index = _dataList.indexOf(student);
+      _dataList[index] = editedStudent;
+    });
+
+    // Optionally, send the edited student data to the server
+    _updateDataOnServer(editedStudent);
+  }
+
   void _sendDataToServer(Student student) async {
     var url = Uri.parse('https://sheetdb.io/api/v1/2i98c60xvm3gp');
-    var response = await http.post(url, body: jsonEncode(student.toJson()), headers: {'Content-Type': 'application/json'});
+    var response = await http.post(url,
+        body: jsonEncode(student.toJson()),
+        headers: {'Content-Type': 'application/json'});
     if (response.statusCode == 201) {
-        getData();
+      getData();
+    } else {
+      // Handle error
+    }
+  }
+
+  void _updateDataOnServer(Student student) async {
+    var url =
+        Uri.parse('https://sheetdb.io/api/v1/2i98c60xvm3gp/id/${student.id}');
+    var response = await http.put(url,
+        body: jsonEncode(student.toJson()),
+        headers: {'Content-Type': 'application/json'});
+    if (response.statusCode == 200) {
+      getData();
+    } else {
+      // Handle error
+    }
+  }
+
+  void _confirmDeleteStudent(Student student) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: Text(
+              'Are you sure you want to delete ${student.name} ${student.surname}?'),
+          actions: [
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteStudent(student);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteStudent(Student student) async {
+    var url =
+        Uri.parse('https://sheetdb.io/api/v1/2i98c60xvm3gp/id/${student.id}');
+    var response = await http.delete(url);
+    if (response.statusCode == 200) {
+      setState(() {
+        _dataList.remove(student);
+      });
     } else {
       // Handle error
     }
@@ -123,12 +205,35 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Student ID: ${item.stdId}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Student ID: ${item.stdId}",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon:
+                                          Icon(Icons.edit, color: Colors.blue),
+                                      onPressed: () {
+                                        _showInputDialog(student: item);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () {
+                                        _confirmDeleteStudent(item);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 5),
                             Text(
@@ -148,7 +253,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _showInputDialog,
+          onPressed: () {
+            _showInputDialog();
+          },
           tooltip: 'Add Student',
           child: const Icon(Icons.add),
         ),
